@@ -11,9 +11,9 @@ public class ClientSend {
         this.client = client;
     }
 
-    public void Disconnect() {
+    public void disconnect() {
         Packet disconnectPacket = new Packet(ClientPackets.Disconnect.ordinal());
-        client.SendData(disconnectPacket);
+        client.sendData(disconnectPacket);
     }
 
 }

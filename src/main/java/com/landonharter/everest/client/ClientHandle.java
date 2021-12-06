@@ -10,12 +10,12 @@ public class ClientHandle {
         this.client = client;
     }
 
-    public void ClaimID(Packet packet) {
-        client.clientID = packet.ReadInt();
+    public void claimId(Packet packet) {
+        client.clientID = packet.readInt();
     }
 
-    public void Disconnect() {
-        client.Disconnect();
+    public void disconnect() {
+        client.disconnect();
     }
 
 }

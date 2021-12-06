@@ -1,7 +1,7 @@
 package com.landonharter.everest.server;
 
-import Radium.Networking.Packet;
-import Radium.Networking.PacketType.ServerPackets;
+import com.landonharter.everest.packet.Packet;
+import com.landonharter.everest.packet.ServerPackets;
 
 public class ServerSend {
 
@@ -11,15 +11,15 @@ public class ServerSend {
         this.client = client;
     }
 
-    public void SendID() {
+    public void sendId() {
         Packet packet = new Packet(ServerPackets.ID.ordinal());
-        packet.Write(client.id);
-        client.SendData(packet);
+        packet.write(client.id);
+        client.sendData(packet);
     }
 
-    public void Disconnect() {
+    public void disconnect() {
         Packet packet = new Packet(ServerPackets.ForceDisconnect.ordinal());
-        client.SendData(packet);
+        client.sendData(packet);
     }
 
 }

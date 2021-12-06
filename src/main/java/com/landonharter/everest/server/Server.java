@@ -17,7 +17,7 @@ public final class Server {
 
     protected Server() {}
 
-    public static void Start(int port) {
+    public static void create(int port) {
         try {
             socket = new ServerSocket(port);
 
@@ -25,7 +25,7 @@ public final class Server {
 
             acceptThread = new Thread(() -> {
                 while (Open) {
-                    AcceptClients();
+                    acceptClients();
                 }
             });
             acceptThread.start();
@@ -34,7 +34,7 @@ public final class Server {
         }
     }
 
-    public static void Close() {
+    public static void close() {
         try {
             Open = false;
             socket.close();
@@ -43,7 +43,7 @@ public final class Server {
         }
     }
 
-    private static void AcceptClients() {
+    private static void acceptClients() {
         Socket newClient = null;
         try {
             newClient = socket.accept();
@@ -60,7 +60,7 @@ public final class Server {
         clients.add(client);
         assignableID++;
 
-        client.send.SendID();
+        client.send.sendId();
     }
 
 }

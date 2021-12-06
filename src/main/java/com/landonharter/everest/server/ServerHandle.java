@@ -1,6 +1,6 @@
 package com.landonharter.everest.server;
 
-import Radium.Networking.Packet;
+import com.landonharter.everest.packet.Packet;
 
 public class ServerHandle {
 
@@ -10,8 +10,8 @@ public class ServerHandle {
         this.client = client;
     }
 
-    public void ClientDisconnect(Packet packet) {
-        client.Disconnect();
+    public void clientDisconnect(Packet packet) {
+        client.disconnect();
     }
 
 }

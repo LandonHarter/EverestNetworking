@@ -20,76 +20,76 @@ public class Packet {
         buffer = new ArrayList<>();
         readPos = 0;
 
-        Write(id);
+        write(id);
     }
 
     public Packet(byte[] data) {
         buffer = new ArrayList<>();
         readPos = 0;
 
-        SetBytes(data);
+        setBytes(data);
     }
 
-    public void SetBytes(byte[] bytes) {
-        Write(bytes);
-        readableBuffer = ToByteArray(buffer.toArray());
+    public void setBytes(byte[] bytes) {
+        write(bytes);
+        readableBuffer = toByteArray(buffer.toArray());
     }
 
-    public void Reset() {
+    public void reset() {
         buffer.clear();
         readableBuffer = null;
         readPos = 0;
     }
 
-    public void Reset(boolean shouldReset) {
+    public void reset(boolean shouldReset) {
         if (shouldReset) {
-            Reset();
+            reset();
         } else {
             readPos -= 4;
         }
     }
 
-    public void Write(byte value) {
+    public void write(byte value) {
         buffer.add(value);
     }
 
-    public void Write(byte[] value) {
-        AddRange(value);
+    public void write(byte[] value) {
+        addRange(value);
     }
 
-    public void Write(int value) {
-        byte[] bytes = ByteUtility.GetBytes(value);
-        AddRange(bytes);
+    public void write(int value) {
+        byte[] bytes = ByteUtility.getBytes(value);
+        addRange(bytes);
     }
 
-    public void Write(float value) {
-        byte[] bytes = ByteUtility.GetBytes(value);
-        AddRange(bytes);
+    public void write(float value) {
+        byte[] bytes = ByteUtility.getBytes(value);
+        addRange(bytes);
     }
 
-    public void Write(boolean value) {
-        byte[] bytes = ByteUtility.GetBytes(value);
-        AddRange(bytes);
+    public void write(boolean value) {
+        byte[] bytes = ByteUtility.getBytes(value);
+        addRange(bytes);
     }
 
-    public void Write(String value) {
-        Write(value.length());
+    public void write(String value) {
+        write(value.length());
 
-        byte[] bytes = ByteUtility.GetBytes(value);
-        AddRange(bytes);
+        byte[] bytes = ByteUtility.getBytes(value);
+        addRange(bytes);
     }
 
-    public void Write(int[] value) {
-        Write(value.length);
+    public void write(int[] value) {
+        write(value.length);
         for (int integer : value) {
-            Write(integer);
+            write(integer);
         }
     }
 
-    public void Write(float[] value) {
-        Write(value.length);
+    public void write(float[] value) {
+        write(value.length);
         for (float dec : value) {
-            Write(dec);
+            write(dec);
         }
     }
 
@@ -106,9 +106,9 @@ public class Packet {
         }
     }
 
-    public byte[] ReadBytes(int length) {
+    public byte[] readBytes(int length) {
         if (buffer.size() > readPos) {
-            byte[] value = ToByteArray(buffer.subList(readPos, readPos + length).toArray());
+            byte[] value = toByteArray(buffer.subList(readPos, readPos + length).toArray());
             readPos += length;
 
             return value;
@@ -118,7 +118,7 @@ public class Packet {
         }
     }
 
-    public int ReadInt() {
+    public int readInt() {
         if (buffer.size() > readPos) {
             int value = ByteUtility.ToInt(readableBuffer, readPos);
             readPos += 4;
@@ -130,9 +130,9 @@ public class Packet {
         }
     }
 
-    public float ReadFloat() {
+    public float readFloat() {
         if (buffer.size() > readPos) {
-            float value = ByteUtility.ToFloat(readableBuffer, readPos);
+            float value = ByteUtility.toFloat(readableBuffer, readPos);
             readPos += 4;
 
             return value;
@@ -142,9 +142,9 @@ public class Packet {
         }
     }
 
-    public boolean ReadBoolean() {
+    public boolean readBoolean() {
         if (buffer.size() > readPos) {
-            boolean value = ByteUtility.ToBoolean(readableBuffer, readPos);
+            boolean value = ByteUtility.toBoolean(readableBuffer, readPos);
             readPos += 1;
 
             return value;
@@ -154,10 +154,10 @@ public class Packet {
         }
     }
 
-    public String ReadString() {
+    public String readString() {
         if (buffer.size() > readPos) {
-            int length = ReadInt();
-            String value = ByteUtility.ToString(readableBuffer, readPos, length);
+            int length = readInt();
+            String value = ByteUtility.toString(readableBuffer, readPos, length);
 
             if (value.length() > 0) {
                 readPos += length;
@@ -170,13 +170,13 @@ public class Packet {
         }
     }
 
-    public int[] ReadIntArray() {
+    public int[] readIntArray() {
         if (buffer.size() > readPos) {
-            int length = ReadInt();
+            int length = readInt();
             int[] values = new int[length];
 
             for (int i = 0; i < values.length; i++) {
-                values[i] = ReadInt();
+                values[i] = readInt();
             }
 
             return values;
@@ -186,13 +186,13 @@ public class Packet {
         }
     }
 
-    public float[] ReadFloatArray() {
+    public float[] readFloatArray() {
         if (buffer.size() > readPos) {
-            int length = ReadInt();
+            int length = readInt();
             float[] values = new float[length];
 
             for (int i = 0; i < values.length; i++) {
-                values[i] = ReadFloat();
+                values[i] = readFloat();
             }
 
             return values;
@@ -202,36 +202,36 @@ public class Packet {
         }
     }
 
-    public void WriteLength() {
-        InsertRange(ByteUtility.GetBytes(buffer.size()), 0);
+    public void writeLength() {
+        insertRange(ByteUtility.getBytes(buffer.size()), 0);
     }
 
-    public int UnreadLength() {
-        return Length() - readPos;
+    public int unreadLength() {
+        return length() - readPos;
     }
 
-    public int Length() {
+    public int length() {
         return buffer.size();
     }
 
-    public byte[] ToArray() {
-        readableBuffer = ToByteArray(buffer.toArray());
+    public byte[] toArray() {
+        readableBuffer = toByteArray(buffer.toArray());
         return readableBuffer;
     }
 
-    private void AddRange(byte[] data) {
+    private void addRange(byte[] data) {
         for (byte b : data) {
             buffer.add(b);
         }
     }
 
-    private void InsertRange(byte[] data, int index) {
+    private void insertRange(byte[] data, int index) {
         for (int i = data.length - 1; i >= 0; i--) {
             buffer.add(index, data[i]);
         }
     }
 
-    private byte[] ToByteArray(Object[] array) {
+    private byte[] toByteArray(Object[] array) {
         byte[] byteArray = new byte[array.length];
         for (int i = 0; i < byteArray.length; i++) {
             byteArray[i] = (byte)array[i];

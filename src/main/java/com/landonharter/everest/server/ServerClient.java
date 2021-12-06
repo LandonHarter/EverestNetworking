@@ -1,8 +1,7 @@
 package com.landonharter.everest.server;
 
-import RadiumEditor.Console;
-import Radium.Networking.Packet;
-import Radium.Networking.PacketType.ClientPackets;
+import com.landonharter.everest.packet.ClientPackets;
+import com.landonharter.everest.packet.Packet;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -42,13 +41,13 @@ public class ServerClient {
             receivedData = new Packet();
             receiveBuffer = new byte[4096];
 
-            InitializePacketHandlers();
+            initializePacketHandlers();
 
             Connected = true;
 
             updateThread = new Thread(() -> {
                 while (Connected) {
-                    Update();
+                    update();
                 }
             });
             updateThread.start();
@@ -57,23 +56,23 @@ public class ServerClient {
         }
     }
 
-    public void Update() {
+    public void update() {
         try {
             input.read(receiveBuffer, 0, receiveBuffer.length);
             int byteLength = receiveBuffer.length;
 
             if (byteLength <= 0) {
-                ForceDisconnect();
+                forceDisconnect();
                 return;
             }
-            receivedData.Reset(HandlePacket(receiveBuffer));
+            receivedData.reset(HandlePacket(receiveBuffer));
         } catch (Exception e) {
             if (socket.isClosed()) return;
             else System.err.println(e);
         }
     }
 
-    public void Disconnect() {
+    public void disconnect() {
         try {
             Connected = false;
 
@@ -84,57 +83,57 @@ public class ServerClient {
         }
     }
 
-    public void ForceDisconnect() {
-        send.Disconnect();
+    public void forceDisconnect() {
+        send.disconnect();
     }
 
-    public void SendData(Packet packet) {
+    public void sendData(Packet packet) {
         try {
-            packet.WriteLength();
-            output.write(packet.ToArray(), 0, packet.Length());
+            packet.writeLength();
+            output.write(packet.toArray(), 0, packet.length());
             output.flush();
         } catch (Exception e) {
             System.err.println(e);
         }
     }
 
-    public String GetIP() {
-        return FormatIP(socket.getRemoteSocketAddress().toString());
+    public String getIp() {
+        return formatIP(socket.getRemoteSocketAddress().toString());
     }
 
-    private String FormatIP(String ip) {
+    private String formatIP(String ip) {
         return ip.split("/")[1];
     }
 
-    private void InitializePacketHandlers() {
+    private void initializePacketHandlers() {
         packetHandlers.put(ClientPackets.Disconnect.ordinal(), (Packet packet) -> {
-            handle.ClientDisconnect(packet);
+            handle.clientDisconnect(packet);
         });
     }
 
     private boolean HandlePacket(byte[] data) {
         int packetLength = 0;
 
-        receivedData.SetBytes(data);
-        if (receivedData.UnreadLength() >= 4) {
-            packetLength = receivedData.ReadInt();
+        receivedData.setBytes(data);
+        if (receivedData.unreadLength() >= 4) {
+            packetLength = receivedData.readInt();
             if (packetLength <= 0) {
                 return true;
             }
         }
 
-        while (packetLength > 0 && packetLength <= receivedData.UnreadLength()) {
-            byte[] packetBytes = receivedData.ReadBytes(packetLength);
+        while (packetLength > 0 && packetLength <= receivedData.unreadLength()) {
+            byte[] packetBytes = receivedData.readBytes(packetLength);
 
             Packet newPacket = new Packet(packetBytes);
-            int packetID = newPacket.ReadInt();
+            int packetID = newPacket.readInt();
             packetHandlers.getOrDefault(packetID, (Packet packet) -> {
-                Console.Warning("Received a packet with an unidentifiable id");
+                System.out.println("Received a packet with an unidentifiable id");
             }).accept(newPacket);
 
             packetLength = 0;
-            if (receivedData.UnreadLength() >= 4) {
-                packetLength = receivedData.ReadInt();
+            if (receivedData.unreadLength() >= 4) {
+                packetLength = receivedData.readInt();
                 if (packetLength <= 0) return true;
             }
         }

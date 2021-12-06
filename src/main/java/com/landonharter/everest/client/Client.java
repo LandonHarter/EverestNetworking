@@ -15,8 +15,8 @@ public class Client {
     private int connectedPort;
     public int clientID;
 
-    public ClientHandle handle;
-    public ClientSend send;
+    private ClientHandle handle;
+    private ClientSend send;
 
     private Socket socket;
     private DataInputStream input;
@@ -31,10 +31,10 @@ public class Client {
     private Thread updateThread;
 
     public Client() {
-        InitializePacketHandlers();
+        initializePacketHandlers();
     }
 
-    public void Connect(String ip, int port) {
+    public void connect(String ip, int port) {
         try {
             socket = new Socket(ip, port);
             input = new DataInputStream(socket.getInputStream());
@@ -51,7 +51,7 @@ public class Client {
             Connected = true;
 
             updateThread = new Thread(() -> {
-                while (Connected) Update();
+                while (Connected) update();
             });
             updateThread.start();
         } catch (Exception e) {
@@ -59,27 +59,27 @@ public class Client {
         }
     }
 
-    private void Update() {
+    private void update() {
         try {
             input.read(receiveBuffer, 0, receiveBuffer.length);
             int byteLength = receiveBuffer.length;
 
             if (byteLength <= 0) {
-                Disconnect();
+                disconnect();
                 return;
             }
-            receivedData.Reset(HandlePacket(receiveBuffer));
+            receivedData.reset(handlePacket(receiveBuffer));
         } catch (Exception e) {
             System.err.println(e);
         }
     }
 
-    public void Disconnect() {
+    public void disconnect() {
         try {
             Connected = false;
 
             if (socket.isConnected()) {
-                send.Disconnect();
+                send.disconnect();
             }
 
             socket.close();
@@ -92,39 +92,39 @@ public class Client {
         }
     }
 
-    public void SendData(Packet packet) {
+    public void sendData(Packet packet) {
         try {
-            packet.WriteLength();
-            output.write(packet.ToArray(), 0, packet.Length());
+            packet.writeLength();
+            output.write(packet.toArray(), 0, packet.length());
             output.flush();
         } catch (Exception e) {
             System.err.println(e);
         }
     }
 
-    private boolean HandlePacket(byte[] data) {
+    private boolean handlePacket(byte[] data) {
         int packetLength = 0;
 
-        receivedData.SetBytes(data);
-        if (receivedData.UnreadLength() >= 4) {
-            packetLength = receivedData.ReadInt();
+        receivedData.setBytes(data);
+        if (receivedData.unreadLength() >= 4) {
+            packetLength = receivedData.readInt();
             if (packetLength <= 0) {
                 return true;
             }
         }
 
-        while (packetLength > 0 && packetLength <= receivedData.UnreadLength()) {
-            byte[] packetBytes = receivedData.ReadBytes(packetLength);
+        while (packetLength > 0 && packetLength <= receivedData.unreadLength()) {
+            byte[] packetBytes = receivedData.readBytes(packetLength);
 
             Packet newPacket = new Packet(packetBytes);
-            int packetID = newPacket.ReadInt();
+            int packetID = newPacket.readInt();
             packetHandlers.getOrDefault(packetID, (Packet packet) -> {
                 System.out.println("Received a packet with an unidentifiable packet ID");
             }).accept(newPacket);
 
             packetLength = 0;
-            if (receivedData.UnreadLength() >= 4) {
-                packetLength = receivedData.ReadInt();
+            if (receivedData.unreadLength() >= 4) {
+                packetLength = receivedData.readInt();
                 if (packetLength <= 0) return true;
             }
         }
@@ -134,9 +134,29 @@ public class Client {
         return false;
     }
 
-    private void InitializePacketHandlers() {
-        packetHandlers.put(ServerPackets.ID.ordinal(), (Packet packet) -> { handle.ClaimID(packet); });
-        packetHandlers.put(ServerPackets.ForceDisconnect.ordinal(), (Packet packet) -> { handle.Disconnect(); });
+    private void initializePacketHandlers() {
+        packetHandlers.put(ServerPackets.ID.ordinal(), (Packet packet) -> { handle.claimId(packet); });
+        packetHandlers.put(ServerPackets.ForceDisconnect.ordinal(), (Packet packet) -> { handle.disconnect(); });
+    }
+
+    public String getConnectedIP() {
+        return connectedIP;
+    }
+
+    public int getPort() {
+        return connectedPort;
+    }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public ClientHandle getHandle() {
+        return handle;
+    }
+
+    public ClientSend getSend() {
+        return send;
     }
 
 }
