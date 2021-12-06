@@ -1,2 +1,2 @@
-# EverestNetworking
-An easy way to implement networking into your java projects
+# Everest Networking
+The easy way to implement networking into your java projects
