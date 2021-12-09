@@ -1,4 +1,4 @@
-package simple;
+package examples.simple;
 
 import com.landonharter.everest.client.Client;
 import com.landonharter.everest.server.Server;
