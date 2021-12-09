@@ -1,9 +1,7 @@
-package com.landonharter.everest.examples.simple;
+package simple;
 
 import com.landonharter.everest.client.Client;
 import com.landonharter.everest.server.Server;
-
-import java.util.Scanner;
 
 public class Main {
 
