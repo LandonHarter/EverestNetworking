@@ -1,3 +1,4 @@
 rootProject.name = 'EverestNetworking'
 include 'examples'
+include 'examples'
 

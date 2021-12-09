@@ -13,7 +13,7 @@ public class ServerSend {
 
     public void sendId() {
         Packet packet = new Packet(ServerPackets.ID.ordinal());
-        packet.write(client.id);
+        packet.write(client.getId());
         client.sendData(packet);
     }
 

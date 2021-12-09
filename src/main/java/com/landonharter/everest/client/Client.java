@@ -1,5 +1,6 @@
 package com.landonharter.everest.client;
 
+import com.landonharter.everest.packet.ClientPackets;
 import com.landonharter.everest.packet.Packet;
 import com.landonharter.everest.packet.ServerPackets;
 
@@ -7,13 +8,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Hashtable;
+import java.util.Random;
 import java.util.function.Consumer;
 
 public class Client {
 
     private String connectedIP;
     private int connectedPort;
-    public int clientID;
+
+    private int clientID;
+    private String clientNickname;
 
     private ClientHandle handle;
     private ClientSend send;
@@ -22,7 +26,8 @@ public class Client {
     private DataInputStream input;
     private DataOutputStream output;
 
-    private boolean Connected = true;
+    private boolean connected = true;
+    private boolean hasClaimedId = false;
 
     private Packet receivedData;
     private byte[] receiveBuffer;
@@ -30,28 +35,31 @@ public class Client {
 
     private Thread updateThread;
 
-    public Client() {
+    public Client(String ip, int port) {
+        connectedIP = ip;
+        connectedPort = port;
+
         initializePacketHandlers();
     }
 
-    public void connect(String ip, int port) {
+    public void connect() {
         try {
-            socket = new Socket(ip, port);
+            socket = new Socket(connectedIP, connectedPort);
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
             handle = new ClientHandle(this);
             send = new ClientSend(this);
 
-            connectedIP = ip;
-            connectedPort = port;
-
             receivedData = new Packet();
             receiveBuffer = new byte[4096];
 
-            Connected = true;
+            changeNickname("Client" + new Random().nextInt(100000));
 
+            connected = true;
             updateThread = new Thread(() -> {
-                while (Connected) update();
+                while (connected) {
+                    update();
+                }
             });
             updateThread.start();
         } catch (Exception e) {
@@ -76,7 +84,8 @@ public class Client {
 
     public void disconnect() {
         try {
-            Connected = false;
+            connected = false;
+            hasClaimedId = false;
 
             if (socket.isConnected()) {
                 send.disconnect();
@@ -120,6 +129,7 @@ public class Client {
             int packetID = newPacket.readInt();
             packetHandlers.getOrDefault(packetID, (Packet packet) -> {
                 System.out.println("Received a packet with an unidentifiable packet ID");
+                System.out.println("Packet ID: " + packetID);
             }).accept(newPacket);
 
             packetLength = 0;
@@ -157,6 +167,32 @@ public class Client {
 
     public ClientSend getSend() {
         return send;
+    }
+
+    public int getId() {
+        return clientID;
+    }
+
+    public String getNickname() {
+        return clientNickname;
+    }
+
+    public void changeNickname(String newNickname) {
+        Packet packet = new Packet(ClientPackets.ChangeNickname);
+        packet.write(newNickname);
+        sendData(packet);
+
+        clientNickname = newNickname;
+    }
+
+    public void claimId(int id) {
+        if (hasClaimedId) {
+            System.out.println("Failed to set ID");
+            return;
+        }
+
+        clientID = id;
+        hasClaimedId = true;
     }
 
 }

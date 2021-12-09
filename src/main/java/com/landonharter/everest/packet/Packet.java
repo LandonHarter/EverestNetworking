@@ -1,6 +1,6 @@
 package com.landonharter.everest.packet;
 
-import com.landonharter.everest.utility.ByteUtility;
+import com.landonharter.everest.utility.Convert;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -21,6 +21,20 @@ public class Packet {
         readPos = 0;
 
         write(id);
+    }
+
+    public Packet(ClientPackets packet) {
+        buffer = new ArrayList<>();
+        readPos = 0;
+
+        write(packet.ordinal());
+    }
+
+    public Packet(ServerPackets packet) {
+        buffer = new ArrayList<>();
+        readPos = 0;
+
+        write(packet.ordinal());
     }
 
     public Packet(byte[] data) {
@@ -58,24 +72,24 @@ public class Packet {
     }
 
     public void write(int value) {
-        byte[] bytes = ByteUtility.getBytes(value);
+        byte[] bytes = Convert.getBytes(value);
         addRange(bytes);
     }
 
     public void write(float value) {
-        byte[] bytes = ByteUtility.getBytes(value);
+        byte[] bytes = Convert.getBytes(value);
         addRange(bytes);
     }
 
     public void write(boolean value) {
-        byte[] bytes = ByteUtility.getBytes(value);
+        byte[] bytes = Convert.getBytes(value);
         addRange(bytes);
     }
 
     public void write(String value) {
         write(value.length());
 
-        byte[] bytes = ByteUtility.getBytes(value);
+        byte[] bytes = Convert.getBytes(value);
         addRange(bytes);
     }
 
@@ -120,7 +134,7 @@ public class Packet {
 
     public int readInt() {
         if (buffer.size() > readPos) {
-            int value = ByteUtility.ToInt(readableBuffer, readPos);
+            int value = Convert.toInt(readableBuffer, readPos);
             readPos += 4;
 
             return value;
@@ -132,7 +146,7 @@ public class Packet {
 
     public float readFloat() {
         if (buffer.size() > readPos) {
-            float value = ByteUtility.toFloat(readableBuffer, readPos);
+            float value = Convert.toFloat(readableBuffer, readPos);
             readPos += 4;
 
             return value;
@@ -144,7 +158,7 @@ public class Packet {
 
     public boolean readBoolean() {
         if (buffer.size() > readPos) {
-            boolean value = ByteUtility.toBoolean(readableBuffer, readPos);
+            boolean value = Convert.toBoolean(readableBuffer, readPos);
             readPos += 1;
 
             return value;
@@ -157,7 +171,7 @@ public class Packet {
     public String readString() {
         if (buffer.size() > readPos) {
             int length = readInt();
-            String value = ByteUtility.toString(readableBuffer, readPos, length);
+            String value = Convert.toString(readableBuffer, readPos, length);
 
             if (value.length() > 0) {
                 readPos += length;
@@ -203,7 +217,7 @@ public class Packet {
     }
 
     public void writeLength() {
-        insertRange(ByteUtility.getBytes(buffer.size()), 0);
+        insertRange(Convert.getBytes(buffer.size()), 0);
     }
 
     public int unreadLength() {

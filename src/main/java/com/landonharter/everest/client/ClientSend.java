@@ -12,7 +12,7 @@ public class ClientSend {
     }
 
     public void disconnect() {
-        Packet disconnectPacket = new Packet(ClientPackets.Disconnect.ordinal());
+        Packet disconnectPacket = new Packet(ClientPackets.Disconnect);
         client.sendData(disconnectPacket);
     }
 

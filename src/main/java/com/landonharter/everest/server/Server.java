@@ -1,5 +1,8 @@
 package com.landonharter.everest.server;
 
+import com.landonharter.everest.packet.Packet;
+import com.landonharter.everest.packet.ServerPackets;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -12,19 +15,19 @@ public final class Server {
     public static List<ServerClient> clients = new ArrayList<>();
     private static int assignableID = 0;
 
-    public static boolean Open = false;
+    private static boolean open = false;
     private static Thread acceptThread;
 
-    protected Server() {}
+    protected Server() { }
 
     public static void create(int port) {
         try {
             socket = new ServerSocket(port);
 
-            Open = true;
+            open = true;
 
             acceptThread = new Thread(() -> {
-                while (Open) {
+                while (open) {
                     acceptClients();
                 }
             });
@@ -36,10 +39,22 @@ public final class Server {
 
     public static void close() {
         try {
-            Open = false;
+            sendToAll(new Packet(ServerPackets.ForceDisconnect));
+
+            open = false;
             socket.close();
         } catch (Exception e) {
             System.err.println(e);
+        }
+    }
+
+    public static void sendTo(int client, Packet packet) {
+        clients.get(client).sendData(packet);
+    }
+
+    public static void sendToAll(Packet packet) {
+        for (ServerClient client : clients) {
+            client.sendData(packet);
         }
     }
 
@@ -48,19 +63,24 @@ public final class Server {
         try {
             newClient = socket.accept();
         } catch (Exception e) {
-            if (!Open) {
+            if (!open) {
                 return;
             } else {
                 System.err.println(e);
             }
         }
+
         ServerClient client = new ServerClient(newClient);
-        client.id = assignableID;
+        client.claimId(assignableID);
 
         clients.add(client);
         assignableID++;
 
-        client.send.sendId();
+        client.getSend().sendId();
+    }
+
+    public static boolean isOpen() {
+        return open;
     }
 
 }

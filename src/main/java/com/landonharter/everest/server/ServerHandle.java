@@ -10,6 +10,10 @@ public class ServerHandle {
         this.client = client;
     }
 
+    public void clientChangeNickname(Packet packet) {
+        client.setNickname(packet.readString());
+    }
+
     public void clientDisconnect(Packet packet) {
         client.disconnect();
     }

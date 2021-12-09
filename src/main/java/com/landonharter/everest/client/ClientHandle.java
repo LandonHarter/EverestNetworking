@@ -11,7 +11,7 @@ public class ClientHandle {
     }
 
     public void claimId(Packet packet) {
-        client.clientID = packet.readInt();
+        client.claimId(packet.readInt());
     }
 
     public void disconnect() {

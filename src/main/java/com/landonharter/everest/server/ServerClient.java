@@ -15,17 +15,19 @@ public class ServerClient {
     public DataInputStream input;
     public DataOutputStream output;
 
-    public ServerHandle handle;
-    public ServerSend send;
+    private ServerHandle handle;
+    private ServerSend send;
 
     private Packet receivedData;
     private byte[] receiveBuffer;
 
-    private boolean Connected = false;
+    private boolean connected = false;
+    private boolean hasClaimedId = false;
 
     private Hashtable<Integer, Consumer<Packet>> packetHandlers = new Hashtable<>();
 
-    public int id;
+    private int id;
+    private String nickname;
 
     private Thread updateThread;
 
@@ -43,10 +45,10 @@ public class ServerClient {
 
             initializePacketHandlers();
 
-            Connected = true;
+            connected = true;
 
             updateThread = new Thread(() -> {
-                while (Connected) {
+                while (connected) {
                     update();
                 }
             });
@@ -74,7 +76,8 @@ public class ServerClient {
 
     public void disconnect() {
         try {
-            Connected = false;
+            connected = false;
+            hasClaimedId = false;
 
             socket.close();
             Server.clients.remove(id);
@@ -98,14 +101,13 @@ public class ServerClient {
     }
 
     public String getIp() {
-        return formatIP(socket.getRemoteSocketAddress().toString());
-    }
-
-    private String formatIP(String ip) {
-        return ip.split("/")[1];
+        return socket.getRemoteSocketAddress().toString();
     }
 
     private void initializePacketHandlers() {
+        packetHandlers.put(ClientPackets.ChangeNickname.ordinal(), (Packet packet) -> {
+            handle.clientChangeNickname(packet);
+        });
         packetHandlers.put(ClientPackets.Disconnect.ordinal(), (Packet packet) -> {
             handle.clientDisconnect(packet);
         });
@@ -129,6 +131,7 @@ public class ServerClient {
             int packetID = newPacket.readInt();
             packetHandlers.getOrDefault(packetID, (Packet packet) -> {
                 System.out.println("Received a packet with an unidentifiable id");
+                System.out.println("Packet ID: " + packetID);
             }).accept(newPacket);
 
             packetLength = 0;
@@ -141,6 +144,40 @@ public class ServerClient {
         if (packetLength <= 1) return true;
 
         return false;
+    }
+
+    public ServerSend getSend() {
+        return send;
+    }
+
+    public ServerHandle getHandle() {
+        return handle;
+    }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void claimId(int id) {
+        if (hasClaimedId) {
+            System.out.println("Failed to set ID");
+            return;
+        }
+
+        this.id = id;
+        hasClaimedId = true;
     }
 
 }

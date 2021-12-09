@@ -7,7 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ByteUtility {
+public final class Convert {
+
+    protected Convert() {}
 
     public static byte[] getBytes(int value) {
         return fromBytes(Bytes.from(value).toBoxedArray());
@@ -26,7 +28,7 @@ public final class ByteUtility {
         return value.getBytes();
     }
 
-    public static int ToInt(byte[] value, int startIndex) {
+    public static int toInt(byte[] value, int startIndex) {
         return Bytes.from(toByteList(value).subList(startIndex, startIndex + 4)).toInt();
     }
 
