@@ -76,6 +76,7 @@ public class Client {
                 disconnect();
                 return;
             }
+
             receivedData.reset(handlePacket(receiveBuffer));
         } catch (Exception e) {
             System.err.println(e);
@@ -128,8 +129,12 @@ public class Client {
             Packet newPacket = new Packet(packetBytes);
             int packetID = newPacket.readInt();
             packetHandlers.getOrDefault(packetID, (Packet packet) -> {
-                System.out.println("Received a packet with an unidentifiable packet ID");
-                System.out.println("Packet ID: " + packetID);
+                if (packetID != -1) {
+                    System.err.println("Client: Received a packet with an unidentifiable packet ID");
+                    System.err.println("Packet ID: " + packetID);
+                } else {
+                    System.out.println("Client: Received a packet without an ID");
+                }
             }).accept(newPacket);
 
             packetLength = 0;

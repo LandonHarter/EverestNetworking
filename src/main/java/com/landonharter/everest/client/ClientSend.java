@@ -12,7 +12,8 @@ public class ClientSend {
     }
 
     public void disconnect() {
-        Packet disconnectPacket = new Packet(ClientPackets.Disconnect);
+        Packet disconnectPacket = new Packet(1);
+        disconnectPacket.write("Disconnect");
         client.sendData(disconnectPacket);
     }
 

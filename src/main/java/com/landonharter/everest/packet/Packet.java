@@ -2,6 +2,8 @@ package com.landonharter.everest.packet;
 
 import com.landonharter.everest.utility.Convert;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -14,6 +16,8 @@ public class Packet {
     public Packet() {
         buffer = new ArrayList<>();
         readPos = 0;
+
+        write(-1);
     }
 
     public Packet(int id) {
@@ -64,33 +68,58 @@ public class Packet {
     }
 
     public void write(byte value) {
+        if (!canWrite(1)) {
+            notEnoughSpace();
+            return;
+        }
+
         buffer.add(value);
     }
 
     public void write(byte[] value) {
+        if (!canWrite(value.length)) {
+            notEnoughSpace();
+            return;
+        }
+
         addRange(value);
     }
 
     public void write(int value) {
+        if (!canWrite(4)) {
+            notEnoughSpace();
+            return;
+        }
+
         byte[] bytes = Convert.getBytes(value);
         addRange(bytes);
     }
 
     public void write(float value) {
+        if (!canWrite(4)) {
+            notEnoughSpace();
+            return;
+        }
+
         byte[] bytes = Convert.getBytes(value);
         addRange(bytes);
     }
 
     public void write(boolean value) {
+        if (!canWrite(1)) {
+            notEnoughSpace();
+            return;
+        }
+
         byte[] bytes = Convert.getBytes(value);
         addRange(bytes);
     }
 
     public void write(String value) {
-        write(value.length());
-
         byte[] bytes = Convert.getBytes(value);
-        addRange(bytes);
+        
+        write(value.length());
+        write(bytes);
     }
 
     public void write(int[] value) {
@@ -107,7 +136,11 @@ public class Packet {
         }
     }
 
-    public byte ReadByte() {
+    public void write(Color color) {
+        write(color.getRGB());
+    }
+
+    public byte readByte() {
         if (buffer.size() > readPos) {
             byte value = readableBuffer[readPos];
 
@@ -216,6 +249,10 @@ public class Packet {
         }
     }
 
+    public Color readColor() {
+        return new Color(readInt());
+    }
+
     public void writeLength() {
         insertRange(Convert.getBytes(buffer.size()), 0);
     }
@@ -226,6 +263,20 @@ public class Packet {
 
     public int length() {
         return buffer.size();
+    }
+
+    public int unusedStorage() {
+        int unused = 4096 - buffer.size();
+
+        return unused;
+    }
+
+    public boolean hasStorage() {
+        if (unusedStorage() > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     public byte[] toArray() {
@@ -252,6 +303,18 @@ public class Packet {
         }
 
         return byteArray;
+    }
+
+    private boolean canWrite(int size) {
+        if (unusedStorage() >= size) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void notEnoughSpace() {
+        System.err.println("Packet: There isn't enough space left to write the value");
     }
 
 }

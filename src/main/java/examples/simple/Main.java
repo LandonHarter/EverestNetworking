@@ -1,6 +1,7 @@
 package examples.simple;
 
 import com.landonharter.everest.client.Client;
+import com.landonharter.everest.packet.Packet;
 import com.landonharter.everest.server.Server;
 
 public class Main {
@@ -22,17 +23,7 @@ public class Main {
         Server.create(PORT);
         client.connect();
 
-        System.out.println("Client connected.");
-
-        Thread.sleep(3000);
-
         client.disconnect();
-        System.out.println("Client disconnected.");
-
-        Thread.sleep(3000);
-
-        Server.close();
-        System.out.println("Server closed.");
     }
 
 }

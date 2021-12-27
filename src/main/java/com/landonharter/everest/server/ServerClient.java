@@ -130,8 +130,12 @@ public class ServerClient {
             Packet newPacket = new Packet(packetBytes);
             int packetID = newPacket.readInt();
             packetHandlers.getOrDefault(packetID, (Packet packet) -> {
-                System.out.println("Received a packet with an unidentifiable id");
-                System.out.println("Packet ID: " + packetID);
+                if (packetID != -1) {
+                    System.err.println("Server: Received a packet with an unidentifiable ID");
+                    System.err.println("Packet ID: " + packetID);
+                } else {
+                    System.out.println("Server: Received a packet with no ID");
+                }
             }).accept(newPacket);
 
             packetLength = 0;
